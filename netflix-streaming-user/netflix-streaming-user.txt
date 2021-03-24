@@ -1,0 +1,519 @@
+28-05-2020:
+
+http://localhost:2222/Netflix/user/register
+http://localhost:2222/Netflix/user/login
+http://localhost:2222/Netflix/user/update
+http://localhost:2222/Netflix/user/delete?phoneNor=8500874007
+http://localhost:2222/Netflix/user/viewProfile/9492011956
+
+http://localhost:2222/Netflix/user/update/plan
+{
+"phoneNor":"8500874004",
+"planId":"Netflix-Basic"
+}
+
+{
+"phoneNor":"9492011956",
+"userName":"Nagagiri",
+"password":"nagagiri",
+"email":"nagagirigollapalli@gmail.com",
+"planId":"Netflix-Basic"
+}
+{
+"phoneNor":"8500874004",
+"userName":"xxxxx",
+"password":"xxxxx",
+"email":"xxxxxx@gmail.com",
+"planId":"Netflix-Mobile"
+}
+
+
+07-06-2020:
+load balancing algorithms
+
+Round Robin Algorithm...
+Least connections...
+Weighted least connections...
+Source IP hash...
+URL hash...
+The least response time...
+The least bandwidth and the least packets method...
+The custom load method.
+
+
+*More cost
+*if laod balancer fail then client can't connect to application 
+*round robin 1st 2nd 3rd based on load balancing algorithms
+*Network latency client to load balancer load balancer to appropriste which service as less load besed on load balancing algorithm two halfs 
+*If any new node is added register with load balancer
+
+Ribbon is client side laod balancing library
+netflix as provided one library 
+In this library contails load balancing algorithm and implimentaions
+Server side load balancing
+
+Cluster is nothing but group of servers...
+There is no network latency
+
+03-06-2020:
+
+Server side load balancer system for that system configuration file also 
+Load balancer is use algorithm 
+Issue of Servers 
+*Load balacer is fail threre is no way to access culster of servers
+*It has two halfs One half(Clinet to Load balancer) and secound half(Load balancer to node)
+*New server is added that register with load balancer again re-start is required.
+
+
+Notes:
+Server side load balancing
+*If server side balancer fails then multiple servers become unavailble...
+*Increases network latency,becase one request client to load balancer and other load balancer to culster of server..
+*New server is added to cluster load balancer system must be updated and it must me restated..
+*Maintaing server side load balncer is very costly...
+
+   
+Requirements: 
+1.Client has aware of all servers available in cluster
+2.Library required to the client which impliments standard loadbalancing algorithm
+3.The client has delegate the request to the library and it shall invoke one of server
+
+        @Bean
+	@LoadBalanced
+	public RestTemplate restTemplate2(){
+		return new RestTemplate();
+	}
+
+
+@RibbonClient("custribbon") 
+
+
+    @Qualifier("restTemplate2")
+    private RestTemplate restTemplate2;
+
+
+   /* For ribbon */
+ ResponseEntity<List<NetflixDevicesDTO>> re = restTemplate2.exchange("http://custribbon/Netflix/devices/{phoneNor}", HttpMethod.GET, null, typeReference, phoneNor);
+    
+
+  Even those server is down send request to that server...
+----------------------------------------------------------------------------------------------------------------------------
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import com.netflix.client.config.IClientConfig;
+import com.netflix.loadbalancer.IPing;
+import com.netflix.loadbalancer.PingUrl;
+
+@Configuration
+public class PingConfiguration {
+
+@Bean
+public IPing ribbonPing(IClientConfig config) {
+	return new PingUrl();
+}
+	
+}
+--------------------------------------------------------------------------------------------------------------------------------
+@RibbonClient(name = "userribbon",configuration = PingConfiguration.class)
+@SpringBootApplication(scanBasePackages={"com.netflix.client.config.IClientConfig"})
+
+NoOPing strategy
+userribbon.default.NFLoadBalancerRuleClassName=com.netflix.loadbalancer.RandomRule
+
+  userribbon.ribbon.NFLoadBalancerRuleClassName: com.netflix.loadbalancer.AvailabilityFilteringRule
+
+
+
+
+
+#Ribbon config
+userribbon.ribbon.eureka.enabled=false 
+userribbon.ribbon.listOfServers=http://localhost:9491,http://localhost:9492,http://localhost:9493
+userribbon.ribbon.ServerListRefreshInterval=5000
+
+
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-netflix-ribbon</artifactId>
+		</dependency>
+
+
+
+http://localhost:2222/Netflix/user/viewProfile/9492011956
+{
+    "phoneNor": "9492011956",
+    "userName": "Nagagiri",
+    "email": "nagagirigollapalli@gmail.com",
+    "planId": "Netflix-Basic",
+    "currentPlan": {
+        "planId": "Netflix-Basic",
+        "planName": "Basic",
+        "pricePerMonth": "Rs 499",
+        "featuresProvide": "1-screen support, HD content, access across all platforms"
+    },
+    "devicesConnected": [
+        {
+            "device": "SamsungJ6+"
+        },
+        {
+            "device": "OppoF11Pro"
+        }
+    ]
+}
+
+
+
+02-06-2020:
+spring-cloud-config-client make it our microservices as config clients
+
+Before going to load application.properties., It wi be load bootstrap.yml
+BootstrapContex is created spring cloud
+BootstrapContex perent of application context both going to share one enviroment only
+Bootstrap file properties get more priority then application.properties
+bootstrap.yml
+-------------------------------------------------------------------------------------------------
+spring:
+   cloud:
+     config:
+       uri: http://localhost:1111/ConfigServer
+-------------------------------------------------------------------------------------------------
+
+bootstrap.properties
+-------------------------------------------------------------------------------------------------
+spring.cloud.config.uri=http://localhost:1111/ConfigServer
+
+-------------------------------------------------------------------------------------------------
+
+<spring-cloud.version>Hoxton.SR5</spring-cloud.version>
+
+	<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-config-client</artifactId>
+		</dependency>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-dependencies</artifactId>
+				<version>${spring-cloud.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+
+
+	<!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-actuator -->
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-actuator</artifactId>
+    </dependency>
+
+In application.properties or else bootstrap.properties file or git repository common properties...
+#Actuator properties
+management.endpoints.web.exposure.include=*
+
+
+Spring Cloud Config clints:
+
+-->To load common application properties from config server..,At that time of before application context is created...
+   Mean by before context is created all common properties loaded from config server...
+
+Steps:-
+1>Add version,cloud dependancy,management,repository in pom.xml of maven project...
+2>Add Config Clint and Actuator dependencies...
+3>Remove all common application properties in application.properties..,If keep it no problem but more preority get bootstrap.properties file...
+4>Create a new file bootstrap.properties for load common application properties from config server....
+5>Enable Actuator endpoints...
+6>Add SpringbootApplication class on top of class @RefreshScope...
+
+Note:-
+*When properties change in Git it is automatically updated in config server but not microservices(config clints)...
+*To load or update the changes to microservices(config clints)..,
+ Send a POST request thru Postman to the actuator endpoint...
+          http://localhost:<port>/<context-path>/<actuator>/<refresh>    -->POST
+*If spring cloud bus,RabbitSrver(Message Server),Eureka Server in real time intimate to microservice and that changes effected in microservices 1000 of microservices like this...
+
+
+
+http://localhost:2222/Netflix/actuator/refresh    --POST
+http://localhost:2222/Netflix/user/viewProfile/9492011956
+[
+    "config.client.version",
+    "spring.jpa.show-sql"
+]
+
+
+
+http://localhost:2222/Netflix/Netflix/tenures
+http://localhost:2222/Netflix/Netflix/actuator/refresh    --POST
+[
+    "config.client.version",
+    "spring.jpa.show-sql"
+]
+
+http://localhost:2222/Netflix/actuator/refresh
+@RefreshScope
+
+07-06-2020:
+load balancing algorithms
+
+Round Robin Algorithm...
+Least connections...
+Weighted least connections...
+Source IP hash...  
+URL hash...
+The least response time...
+The least bandwidth and the least packets method...
+The custom load method.
+
+
+*More cost
+*if laod balancer fail then client can't connect to application 
+*round robin 1st 2nd 3rd based on load balancing algorithms
+*Network latency client to load balancer load balancer to appropriste which service as less load besed on load balancing algorithm two halfs 
+*If any new node is added register with load balancer
+
+Ribbon is client side laod balancing library
+netflix as provided one library 
+In this library contails load balancing algorithm and implimentaions
+Server side load balancing
+
+Cluster is nothing but group of servers...
+There is no network latency
+
+03-06-2020:
+
+Server side load balancer system for that system configuration file also 
+Load balancer is use algorithm 
+Issue of Servers 
+*Load balacer is fail threre is no way to access culster of servers
+*It has two halfs One half(Clinet to Load balancer) and secound half(Load balancer to node)
+*New server is added that register with load balancer again re-start is required.
+
+
+Notes:
+Server side load balancing
+*If server side balancer fails then multiple servers become unavailble...
+*Increases network latency,becase one request client to load balancer and other load balancer to culster of server..
+*New server is added to cluster load balancer system must be updated and it must me restated..
+*Maintaing server side load balncer is very costly...
+
+   
+Requirements: 
+1.Client has aware of all servers available in cluster
+2.Library required to the client which impliments standard loadbalancing algorithm
+3.The client has delegate the request to the library and it shall invoke one of server
+
+        @Bean
+	@LoadBalanced
+	public RestTemplate restTemplate2(){
+		return new RestTemplate();
+	}
+
+
+
+
+
+
+08-06-2020:
+  *) Add @EnableDiscoveryClient on application classes of  4 microservices
+  *) Add spring.application.name property in application.properties file of 4 microservices
+  *) In customer, use application names for host and port in the friend and plan urls.
+  *) Start eureka,cloud config server and 4 microservices
+  *) Open eureka dashboard at http://localhost:7777
+  *) Test /profile endpoint of netflix-streaming-user
+    Dinamically test with netflix-streaming-device microservices
+  * First stop the 8383 port number of netflix-streaming-device microservice
+  * Again start with another port number 0
+  * 0 port number random port number of netflix-streaming-device microservice(0-63536)
+----------------------------------------------------------------------
+
+***EurekaClient or DiscoveryClient:
+@EnableEurekaClient
+@EnableDiscoveryClient
+@SpringBootApplication
+
+
+
+application.properties file
+---------------------------------------------------------------------------------------------------------
+#Ribbon config
+userribbon.ribbon.eureka.enabled=true 
+#userribbon.ribbon.listOfServers=http://localhost:9491,http://localhost:9492,http://localhost:9493
+#userribbon.ribbon.ServerListRefreshInterval=5000
+
+# Eureka client config
+eureka.client.service-url.defaultZone= http://localhost:5551/eureka
+spring.application.name=NETFLIX-STREAMING-USER
+#netflix-streaming-user
+-----------------------------------------------------------------------------------------------------------
+
+        @Bean
+	@LoadBalanced  
+	public RestTemplate restTemplate2() {
+		return new RestTemplate();
+	}  
+
+@RestController
+@Validated
+@RibbonClient(name = "userribbon")
+public class NetflixUserController {
+    private static final String PLAN_URL="http://NETFLIX-STREAMING-PLAN/Netflix/getSpecificPlan/{id}";
+    private static final String DEVICE_URL="http://NETFLIX-STREAMING-DEVICE/Netflix/devices/{phoneNor}";
+    //private static final String DEVICE_RIBBON_URL="http://userribbon/Netflix/devices/{phoneNor}";
+
+    @Autowired
+    private INetflixUserService service;
+
+   
+    
+    @Autowired  
+    @Qualifier("restTemplate2")
+    private RestTemplate restTemplate2;
+
+
+In pom.xml:
+<spring-cloud.version>Hoxton.SR5</spring-cloud.version>
+
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+		</dependency>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-dependencies</artifactId>
+				<version>${spring-cloud.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>  
+		</dependencies>
+	</dependencyManagement>
+	
+	
+	
+10-06-2020:
+
+How to make an application as resilient?
+                                                           
+[ Miroservice1  ]------>[ Miroservice2  ]------>[ Miroservice3  ]----->[ Miroservice4  ]
+
+*Due to a Network issue or the server is slow or down then other service(s) are unable to contact that service.
+*If we keep on sending the requests thinking that it will start after some time then the requests are endup in a queue and makes other services slowly working.
+*To overcome this isuue, we have ciruit breaker pattern. Which this pattern, We make our application as resilience.
+
+*Resilience means, adding the capacity to recover quickly from difficulties.
+*spring cloud netflix hystrix componet is provided to add resilience.
+  
+Are failed then circuit is opened to stop sending requests to that service.
+*After a time frame, one request is passed through circuit to the service, to check whether it is up and then running or not. if it is up then sll the requests will be sent to that service.
+*If no, then again circuit opens and stops sending requests to the service.
+
+[or]
+
+* If one of the microservice of an application is working very slow or if it is down then it brings down entire application.
+* To prevent an application from the failure of one or two microservices, you need to make microservices as resilient.
+* Spring cloud netflix has provided hystrix component to make microservices as resilient enough.
+* hystrix is an implementation of circuit breaker pattern.
+* hystrix opens a circuit to stop sending request to a microservice and calls a fallback method, if a microservice is down.
+* After given time frame, hystrix will close circuit, sends only one request to a microservice to find out weather it is up or down.
+* If it is down then opens circuit again.	
+
+
+*In pom.xml:
+
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-netflix-hystrix</artifactId>
+		</dependency>
+***
+@SpringBootApplication
+@EnableCircuitBreaker
+   
+*application.properties   
+-----------------------------------------------------------------------------------------------------------------------------------------------
+# Hystrix properties
+hystrix.command.default.circuitBreaker.requestVolumeThreshold=4
+hystrix.command.default.metrics.rollingStats.timeInMilliseconds=10000
+hystrix.command.default.circuitBreaker.errorThresholdPercentage=50
+hystrix.command.default.circuitBreaker.sleepWindowInMilliseconds=60000
+
+hystrix.command.default.execution.isolation.thread.timeoutInMilliseconds= 5000
+-----------------------------------------------------------------------------------------------------------------------------------------------
+package io.springboot2.x.controller;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+
+import io.springboot2.x.dto.NetflixDevicesDTO;
+
+@Service
+public class UserCircuitBreaker {
+	 
+	private static final String DEVICE_URL="http://NETFLIX-STREAMING-DEVICE/Netflix/devices/{phoneNor}";
+
+    @Autowired  
+    @Qualifier("restTemplate2")
+    private RestTemplate restTemplate2;
+
+	@HystrixCommand(fallbackMethod = "getDevicesFallback")
+	public List<NetflixDevicesDTO> getDevice(String phoneNor) {
+		 System.out.println("--->Test1: getDevice() of circuritbreaker");
+		 ParameterizedTypeReference<List<NetflixDevicesDTO>> typeRef = new ParameterizedTypeReference<List<NetflixDevicesDTO>>() {};
+		 ResponseEntity<List<NetflixDevicesDTO>> responseEntity=restTemplate2.exchange(DEVICE_URL, HttpMethod.GET,null,typeRef,phoneNor);
+		 List<NetflixDevicesDTO> devicesConnected=responseEntity.getBody();
+		
+		return devicesConnected;
+		
+		
+
+	}
+
+	public List<NetflixDevicesDTO> getDevicesFallback(String phoneNor) {
+		System.out.println("--->Test2: getDevicesFallback of circuritbreaker");
+		return new ArrayList<>();
+	}
+
+}
+-----------------------------------------------------------------------------------------------------------------------------------------------
+ @GetMapping(value = "/user/viewProfile/{phoneNor}",produces = {"application/json"})
+    public  ResponseEntity<Object> readUser(@PathVariable String phoneNor){
+        NetflixUserDTO netflixUserDTO=service.readUser(phoneNor);
+        if(netflixUserDTO.getPhoneNor()!=null) {
+            //For call PLAN_URL
+            NetflixPlanDTO currentPlan = restTemplate2.getForObject(PLAN_URL, NetflixPlanDTO.class, netflixUserDTO.getPlanId());
+            netflixUserDTO.setCurrentPlan(currentPlan);
+            //For call DEVICE_URL
+        	/*Here..,Call Hystrix CircuitBreaker */
+           List<NetflixDevicesDTO> devicesConnected=breaker.getDevice(phoneNor);
+           netflixUserDTO.setDevicesConnected(devicesConnected);
+           return new ResponseEntity<Object>(netflixUserDTO ,HttpStatus.OK);
+
+        }
+        return new ResponseEntity<Object>("Data is not available!", HttpStatus.OK);
+    }
+    
+-------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+	

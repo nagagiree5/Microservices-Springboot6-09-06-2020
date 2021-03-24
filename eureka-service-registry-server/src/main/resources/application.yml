@@ -1,0 +1,15 @@
+spring:
+  profiles: Eureka1
+  application:
+    name: Eureka
+server:
+  port: 5551
+eureka:
+  instance:
+    hostname: Eur1
+  client: 
+   fetch-registry: false
+   register-with-eureka: false
+   service-url:
+     defaultZone: http://Eur1:5551/eureka
+  

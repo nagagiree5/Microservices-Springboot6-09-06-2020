@@ -1,0 +1,54 @@
+>>02-06-2020:
+
+*cloud config server is created to place common properties of all microservices.
+*create a git repository then create new file application.properties file add common properties.
+*create a new spring stater project Ex: netflix-config-server add dependencies.
+*@EnableConfigServer on spring boot application.
+
+*Add
+spring-cloud-config-server
+@EnableConfigServer
+
+#server properties
+server.port=1111
+server.servlet.context-path=/ConfigServer
+
+#Cloud config server
+spring.cloud.config.server.git.uri=https://github.com/nagagiree/netflix-common-properties.git
+
+
+http://localhost:1111/ConfigServer/application-default.properties
+-----------------------------------------------------------------------------
+spring.datasource.driver-class-name: com.mysql.cj.jdbc.Driver
+spring.datasource.username: root
+spring.datasource.password: giridb
+spring.jpa.show-sql: true
+spring.jpa.hibernate.ddl-auto: update
+
+
+------------------------------------------------------------------------------
+
+
+Spring Cloud Config Server:
+
+-->In the development of an application, We create some n number of microservices and that microservices have some common properties...
+-->When ever some changes are required to application.properties that you have to update all microservices involved in project...
+-->Solution is spring cloud config server.,To manage common application properties of microservices in a git-repo & config server application
+   will load them from git...
+-->Make the microservices as config clints So.,that they can read common properties from config server...
+
+Steps:-
+1>Git account(github.com) vct...
+2>Login,Create repo,Create new file application.properties and add common properties then commit...
+3>Create new boot project for config server...
+
+Note:-
+*Once config server is started we can access common properties loaded from Git...Thru below url
+          http://localhost:1111/ConfigServer/application-default.properties
+
+
+
+
+
+
+

@@ -1,0 +1,170 @@
+08-06-2020:
+Service Registry with Eureka:
+=============================
+* A service registry is a service, in which the microservices of an application are registered.
+* In cloud environment, the host and port of microservices are frequently changed. The other microserservices are unable to contact the microservices.
+  whose host or port is changed
+* To solve this issue, service registry server then it can discover the host and port of other microservices registered with the server.
+* Each microservice with register with a name and other will discover with that name.
+* Spring cloud netflix component for creating a registry server is eureka.
+* Open eureka dashboard at http://localhost:5551
+
+
+***EurekaServer:
+@SpringBootApplication
+@EnableEurekaServer
+
+application.properties file
+# Application config
+server.port=5551
+spring.application.name=EurekaServer
+eureka.client.register-with-eureka=false
+eureka.client.fetch-registry=false
+eureka.client.service-url.defaultZone= http://localhost:5551/eureka
+
+In pom.xml:
+<spring-cloud.version>Hoxton.SR5</spring-cloud.version>
+
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-netflix-eureka-server</artifactId>
+		</dependency>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-dependencies</artifactId>
+				<version>${spring-cloud.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+	
+	
+09-06-2020:
+
+Cluster of eureka servers:
+==========================
+how can we start multiple instances of eureka server?
+ if any case on instance of eureka server failed all 4 microservices getting failed. Thats the reasonwe are creating multiple instances of eureka server.
+
+Now only one Eureka server instance single point of failure.., To form a cluster information is replicated into other server
+One Eureka server got changes that changes effected other Eureka servers also
+
+We need 3 profiles
+Same Eureka server will start 3 times
+
+Only single instance it register with itself
+but mutltiple instances
+3 profiles we activate one of that profile 
+
+1) Goto c:/windows/system32/drivers/etc and open hists file add the below lines.
+
+		127.0.0.1 Eur1
+		127.0.0.1 Eur2
+		127.0.0.1 Eur3
+
+2) In eureka-registry-server application, create application.yml with three profiles(Delete the previous application.properties file)
+
+application.yml
+--------------------------------------------------------------------------------------------------------------------------------
+spring:
+  profiles: Eureka1
+  application:
+    name: Eureka
+server:
+  port: 5551
+eureka:
+  instance:
+    hostname: Eur1
+  client: 
+   fetch-registry: true
+   register-with-eureka: true
+   service-url:
+     defaultZone: http://Eur2:5552/eureka,http://Eur3:5553/eureka
+---
+spring:
+  profiles: Eureka2
+  application:
+    name: Eureka
+server:
+  port: 5552
+eureka:
+  instance:
+    hostname: Eur2
+  client: 
+   fetch-registry: true
+   register-with-eureka: true
+   service-url:
+     defaultZone: http://Eur1:5551/eureka,http://Eur3:5553/eureka
+---
+spring:
+  profiles: Eureka3
+  application:
+    name: Eureka
+server:    
+  port: 5553
+eureka:
+  instance:
+    hostname: Eur3
+  client: 
+   fetch-registry: true
+   register-with-eureka: true
+   service-url:
+     defaultZone: http://Eur2:5552/eureka,http://Eur1:5551/eureka
+-------------------------------------------------------------------------------------------------------------------------------
+3) Run3 instances if eureka server by activating 3 profiles
+Run as configuration-->Environment
+Name                      value
+spring.profiles.active    Eureka1
+
+4) Open GIT and update application.properties to add the service urls of eureka
+http://localhost:1111/ConfigServer/application-default.properties
+#Eureka client properties
+eureka.client.service-url.defaultZone=http://Eur1:5551/eureka,http://Eur2:5552/eureka,http://Eur3:5553/eureka
+Note: boostrap.properties file get more priority then application.properties file so it will take eureka.client.service-url.defaultZone propertie from bootsrap context.
+5) Start config server and 4 microservices
+6) Open 3 eureka dashboards and verify they are updated with same details or not?
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	

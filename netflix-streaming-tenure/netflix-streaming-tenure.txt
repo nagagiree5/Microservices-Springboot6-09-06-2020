@@ -1,0 +1,159 @@
+25-05-2020:
+netflix-tenure
+
+
+http://localhost:5555/Netflix/tenure/9494525638
+http://localhost:5555/Netflix/tenure/add
+http://localhost:5555/Netflix/tenure/delete?id=3
+http://localhost:5555/Netflix/tenures
+http://localhost:5555/Netflix/tenure/update
+{
+"id": 3,
+"mobile": "9494525638",
+"gmail": "poojahegde@gmail.com",
+"plan": "Standrad",
+"start": "2020-05-25",
+"stop": "2020-08-17",
+"durationInHrs":"60-hrs"
+}
+
+
+
+
+02-06-2020:
+spring-cloud-config-client make it our microservices as config clients
+
+Before going to load application.properties., It wi be load bootstrap.yml
+BootstrapContex is created spring cloud
+BootstrapContex perent of application context both going to share one enviroment only
+Bootstrap file properties get more priority then application.properties
+bootstrap.yml
+-------------------------------------------------------------------------------------------------
+spring:
+   cloud:
+     config:
+       uri: http://localhost:1111/ConfigServer
+-------------------------------------------------------------------------------------------------
+
+bootstrap.properties
+-------------------------------------------------------------------------------------------------
+spring.cloud.config.uri=http://localhost:1111/ConfigServer
+
+-------------------------------------------------------------------------------------------------
+
+<spring-cloud.version>Hoxton.SR5</spring-cloud.version>
+
+	<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-config-client</artifactId>
+		</dependency>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-dependencies</artifactId>
+				<version>${spring-cloud.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+
+
+	<!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-actuator -->
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-actuator</artifactId>
+    </dependency>
+
+In application.properties or else bootstrap.properties file or git repository common properties...
+#Actuator properties
+management.endpoints.web.exposure.include=*
+
+
+Spring Cloud Config clints:
+
+-->To load common application properties from config server..,At that time of before application context is created...
+   Mean by before context is created all common properties loaded from config server...
+
+Steps:-
+1>Add version,cloud dependancy,management,repository in pom.xml of maven project...
+2>Add Config Clint and Actuator dependencies...
+3>Remove all common application properties in application.properties..,If keep it no problem but more preority get bootstrap.properties file...
+4>Create a new file bootstrap.properties for load common application properties from config server....
+5>Enable Actuator endpoints...
+6>Add SpringbootApplication class on top of class @RefreshScope...
+
+Note:-
+*When properties change in Git it is automatically updated in config server but not microservices(config clints)...
+*To load or update the changes to microservices(config clints)..,
+ Send a POST request thru Postman to the actuator endpoint...
+          http://localhost:<port>/<context-path>/<actuator>/<refresh>    -->POST
+*If spring cloud bus,RabbitSrver(Message Server),Eureka Server in real time intimate to microservice and that changes effected in microservices 1000 of microservices like this...
+
+
+
+http://localhost:5555/Netflix/actuator/refresh   --POST
+http://localhost:5555/Netflix/tenure/9494525638
+[
+    "config.client.version",
+    "spring.jpa.show-sql"
+]
+
+
+
+http://localhost:5555/Netflix/tenures
+http://localhost:5555/Netflix/actuator/refresh    --POST
+[
+    "config.client.version",
+    "spring.jpa.show-sql"
+]
+
+http://localhost:5555/Netflix/actuator/refresh
+@RefreshScope
+
+
+
+08-06-2020:
+***EurekaClient or DiscoveryClient:
+@EnableEurekaClient
+@EnableDiscoveryClient
+@SpringBootApplication
+
+
+
+application.properties file
+---------------------------------------------------------------------------------------------------------
+
+# Eureka client config
+eureka.client.service-url.defaultZone= http://localhost:5551/eureka
+spring.application.name=NETFLIX-STREAMING-TENURE
+#netflix-streaming-tenure
+-----------------------------------------------------------------------------------------------------------
+
+In pom.xml:
+<spring-cloud.version>Hoxton.SR5</spring-cloud.version>
+
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+		</dependency>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-dependencies</artifactId>
+				<version>${spring-cloud.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+	
+	
+	
+	
+	
